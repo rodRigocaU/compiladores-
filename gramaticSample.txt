@@ -1,0 +1,27 @@
+11f1.2 
+FUNCTION funcion1 
+	variable = read "name.png"
+	variable2 = "name.png"
+	variable3 = variable + variable2
+	noise = 14.15
+	ang = 30
+	rotate variable3 30
+	addNoise variable3 30
+	return variable3
+ENDFUNCTION
+
+
+main:
+	save funcion1
+	imag = read "path.png"
+	imag2 = read "path2.png"
+
+	IF imag == imag2
+		PRINT "SON IGUALES"
+		imag3 = imag + imag2
+		imag3 = rotate imag3 30 ++ scale imag3 2
+		save imag3
+	ENDIF
+;
+
+
