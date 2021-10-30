@@ -1,0 +1,16 @@
+S ->  M
+M -> F main: B
+F -> function B | ε
+B -> I | R | A | ε
+A -> id = L B
+L -> R H | G
+G -> id O id D | * id id
+D -> O id | ε
+O -> + | -
+R -> addnoise id num B | reduce id num B | print string B | colori id num num  B | save id  B | read string B | rotate id num B | scale id num B
+H -> ++ R H | ε
+I -> if Q then B Z
+Z -> endif | else B endel
+Q -> id P
+P -> == id J | <- id J
+J -> ++ Q | -- Q | ε
