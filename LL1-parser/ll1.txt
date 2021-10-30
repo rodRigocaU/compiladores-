@@ -1,1 +1,0 @@
-main:,id,assign,read,string,.,id,assign,read,string,.,if,id,assignassign,id,then,print,string,id,assign,id,+,id,id,assign,rotate,id,num,++,addnoise,id,num,save,id,endif,;
