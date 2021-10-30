@@ -1,15 +1,15 @@
+asdlkñlkds#
 main:
-	imag = r ead "path.png"
-	imag2 = read "path2.png"
-	%DOS PRIMERAS IMAGENES A COMBINAR%
-	imag3 = read "path3.png"
-	imag4 = read "path4.png"
-	imag5 = read "path5.png"
+	imag = r ead "path.png".
+	imag2 = read "path2.png".
+
+	imag3 = read "path3.png".
+	imag4 = read "path4.png".
+	imag5 = read "path5.png".
 	
-	imag6 =  imag + imag2
-	reduceNoise imag3
-	colorRi imag4
-	opaque imag5
+	reduceNoise imag3 11
+	colorRi imag4 11 12
+	scale imag5
 
 	save imag6
 	save imag3
