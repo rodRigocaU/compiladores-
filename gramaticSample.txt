@@ -1,18 +1,13 @@
 main:
-	imag = read "path.png"
-	imag2 = read "path2.png"
+	imag = read "path.png".
+	imag2 = read "path2.png".
 
-	imag3 = read "path3.png"
-	imag4 = read "path4.png"
-	imag5 = read "path5.png"
+	imag3 = read "path3.png".
 	
-	reduceNoise imag3 11
-	addNoise imag4 12
-	scale imag5
+	imag = addNoise imag 30 .
+	imag2 = imag + imag2 .
 
-	save imag6
-	save imag3
-	save imag4
-	save imag5	
-;
-
+	imag3 = scale imag3 14 . 
+	imag4 = imag + imag2 + imag4 .
+	save "newimg.jpg" imag4 
+	;

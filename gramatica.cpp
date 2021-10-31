@@ -3,6 +3,7 @@
 #include <fstream>
 #include <cstring>
 #include <vector>
+#include <algorithm>
 //#include "lecture.h"
 
 using namespace std;
@@ -21,7 +22,7 @@ bool compare(string arr[], int tam, string pal)
 
 bool isF(const char *abs)
 {
-    if(*abs == '\n' || *abs == '\t')
+    if (*abs == '\n' || *abs == '\t')
     {
         return true;
     }
@@ -33,8 +34,8 @@ class anLexico
 private:
     string ope[8] = {"++", "-", "*", "+", "->", "<->"};
     string delim[5] = {"}}", "ENDIF", "ENDEIF", "ENDEL"};
-    string reserved[16] = {"FUNCTION", "IF", "ELSEIF", "ELSE", "RETURN", "AddNoise", "ReduceNoise", "ColorRi",
-                           "compare", "Read", "Save", "Rotate", "Combine", "Solar", "main:", "PRINT"};
+    string reserved[19] = {"FUNCTION", "IF", "ELSEIF", "ELSE", "RETURN", "addNoise", "reduceNoise", "colorRi",
+                           "compare", "read", "save", "rotate", "combine", "solar", "main:", "PRINT", "then", "ENDIF", "scale"};
     string id = "|";
     string str[2] = {"'", "%"};
     string num[10] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9"};
@@ -43,7 +44,7 @@ public:
     void readFile(string);
     bool isDigit(const char *);
     bool isWord(const char *);
-    void anTokens(string, vector<string> &);
+    void anTokens(string, vector<string> &, vector<string> &);
     char peekChar(const char *s, int ss);
 };
 
@@ -72,26 +73,38 @@ char anLexico::peekChar(const char *s, int ss)
     return *(s + ss);
 }
 
-void anLexico::anTokens(string source, vector<string> &result)
+void anLexico::anTokens(string source, vector<string> &result, vector<string> &to_parse)
 {
-    string line;
     int cont;
+    bool pt = false;
     ifstream lectureF(source);
-    cout << "FLAG " << '\n';
+    //cout << "FLAG " << '\n';
     bool salto = false;
     std::string str((std::istreambuf_iterator<char>(lectureF)), std::istreambuf_iterator<char>());
-    cout << "FLAG " << '\n';
+    string lastE;
+    //cout << "FLAG " << '\n';
     if (lectureF.is_open())
     {
         const char *ch;
+        lastE = *ch;
         ch = str.c_str();
         int line;
+        line = 1;
         while (*ch != lectureF.eof())
         {
-            //cout << *ch << " "; 
+            //cout << *ch << " ";
+            //cout << line << " BOOL " << *ch << pt << '\n';
             cont = result.size();
+            //cout << "CH:-" << *ch  << "-"<< '\n';
             //lectureF >> ch;
-            if (*ch == ' ' || *ch == '\t')
+            if (*ch == '.' && pt == true)
+            {
+                pt = false;
+                ch++;
+                to_parse.push_back(".");
+                continue;
+            }
+            else if (*ch == ' ' || *ch == '\t')
             {
                 ch++;
                 continue;
@@ -100,6 +113,7 @@ void anLexico::anTokens(string source, vector<string> &result)
             {
                 ch++;
                 line++;
+                //to_parse.push_back("n");
                 continue;
             }
             else
@@ -114,12 +128,14 @@ void anLexico::anTokens(string source, vector<string> &result)
                     {
                         ch += 2;
                         result.push_back("<TOKEN: OP, LEXEMA: ++  >");
+                        to_parse.push_back("plusplus");
                         salto = true;
                     }
                     else if (peekChar(ch, 1) == ' ' || isDigit(ch) || isWord(ch))
                     {
                         ch += 1;
                         result.push_back("<TOKEN: OP, LEXEMA: + >");
+                        to_parse.push_back("plus");
                     }
                     else
                     {
@@ -132,7 +148,14 @@ void anLexico::anTokens(string source, vector<string> &result)
                     if (peekChar(ch, 1) == ' ' || isDigit(ch) || isWord(ch))
                     {
                         ch++;
+                        result.push_back("<TOKEN: OP, LEXEMA: -- >");
+                        to_parse.push_back("minus");
+                    }
+                    else if (peekChar(ch, 1) == ' ' || isDigit(ch) || isWord(ch))
+                    {
+                        ch += 1;
                         result.push_back("<TOKEN: OP, LEXEMA: - >");
+                        to_parse.push_back("minus");
                     }
                     else
                     {
@@ -146,6 +169,7 @@ void anLexico::anTokens(string source, vector<string> &result)
                     {
                         ch++;
                         result.push_back("<TOKEN: OP, LEXEMA: * >");
+                        to_parse.push_back("*");
                     }
                     else
                     {
@@ -160,11 +184,7 @@ void anLexico::anTokens(string source, vector<string> &result)
                     {
                         ch += 2;
                         result.push_back("<TOKEN: OP, LEXEMA: <- >");
-                    }
-                    else if (peekChar(ch, 1) == ' ' || isDigit(ch) || isWord(ch))
-                    {
-                        ch++;
-                        result.push_back("<TOKEN: ?, LEXEMA: < ");
+                        to_parse.push_back("<-");
                     }
                     else
                     {
@@ -173,15 +193,18 @@ void anLexico::anTokens(string source, vector<string> &result)
                     }
                     break;
                 case '=':
+                    pt = true;  
                     if (peekChar(ch, 1) == '=')
                     {
                         ch += 2;
                         result.push_back("<TOKEN: OP, LEXEMA: ++ >");
+                        to_parse.push_back("assignassign");
                     }
                     else if (peekChar(ch, 1) == ' ' || isDigit(ch) || isWord(ch))
                     {
                         ch += 1;
                         result.push_back("<TOKEN: OP, LEXEMA: = >");
+                        to_parse.push_back("assign");
                     }
                     else
                     {
@@ -193,22 +216,40 @@ void anLexico::anTokens(string source, vector<string> &result)
                 case '\"':
 
                     aux = *ch;
+
                     while (fnd)
                     {
-
                         ch++;
-                         if (*ch == '\"')
+
+                        if (*ch == '\"')
                         {
                             //cout << "ENTRE FINAL "<< '\n';
                             //cout << aux << '\n';
                             aux += *ch;
                             ch++;
                             result.push_back("<TOKEN: STRING, LEXEMA: " + aux + "  >");
+                            to_parse.push_back("string");
                             fnd = false;
                             break;
+                            /*while(*ch == ' ') 
+                            {
+                                ch++;
+                            }
+                            if(*ch == '.')
+                            { 
+                                
+                                aux = *ch;
+                                result.push_back("<TOKEN: FIN, LEXEMA: " + aux + "  >");
+                                to_parse.push_back(aux);
+                            }
+                            else
+                            {
+                                result.push_back("<ERROR: " + to_string(line) + ">");
+                            }*/
                         }
-                        else if (*ch == ' ' || *ch == lectureF.eof() || isF(ch))
+                        else if (*ch == lectureF.eof() || isF(ch))
                         {
+                            //cout << "PRINT" << aux << '\n';
                             result.push_back("<ERROR: " + to_string(line) + ">");
                             fnd = false;
                         }
@@ -221,7 +262,7 @@ void anLexico::anTokens(string source, vector<string> &result)
                     fnd = true;
                     aux.clear();
                     aux = *ch;
-                    
+
                     while (fnd)
                     {
                         //cout << *ch << '\n';
@@ -232,6 +273,7 @@ void anLexico::anTokens(string source, vector<string> &result)
                             aux += *ch;
                             ch++;
                             result.push_back("<TOKEN: COMENTARIO, LEXEMA: " + aux + "  >");
+                            to_parse.push_back("%%");
                             fnd = false;
                             break;
                         }
@@ -251,119 +293,169 @@ void anLexico::anTokens(string source, vector<string> &result)
                 }
 
                 else
-                    {
-                        //cout << "ELSEF:" << *ch << "-" << isDigit(ch) << '\n';
-                        aux.clear();
-                        if (isDigit(ch))
-                        {
-                            
-                            string auxS = "";
-                            bool isD = true;
-                            bool isR = false;
-                            bool erroR = false;
+                {
+                    //cout << "ELSEF:" << *ch << "-" << isDigit(ch) << '\n';
+                    aux.clear();
 
-                            while (isD)
-                            {
-                                //cout << "ENTRE " << *ch << '\n';
-                                auxS += *ch;
-                                if (isDigit(ch))
-                                {
-                                    isD = true;
-                                }
-                                else if (!isDigit(ch) && *ch == '.')
-                                {
-                                    isD = false;
-                                    isR = true;
-                                }
-                                else if (*ch == ' ' || *ch == lectureF.eof() || isF(ch))
-                                {
-                                    auxS= auxS.substr(0, auxS.length() - 1);
-                                    isD = false;
-                                }
-                                else
-                                {
-                                    ch++;
-                                   // cout << "EERROR" << *(ch + 1) << '\n';
-                                    while(*ch != ' ' || isF(ch))
-                                    {
-                                        auxS += *ch;
-                                        ch++;
-                                    }
-                                    isD = false;
-                                    result.push_back("<ERROR: " + to_string(line) + ">");
-                                    erroR = true;
-                                }
-                                ch++;
-                            }
-                            if (!erroR && !isR)
-                            {
-                                result.push_back("<TOKEN: NUM, LEXEMA: " + auxS + "  >");
-                            }
-                            while (isR)
-                            {
-                                auxS += *ch;
-                                if (isDigit(ch))
-                                {
-                                    isR = true;
-                                }
-                                else if (*ch == ' ' || *(ch + 1) == lectureF.eof() || isF(ch))
-                                {
-                                    auxS= auxS.substr(0, auxS.length() - 1);
-                                    isR = false;
-                                }
-                                else
-                                {
-                                    result.push_back("<ERROR: " + to_string(line) + ">");
-                                    break;
-                                }
-                                ch++;
-                            }
-                            if (!erroR && isR)
-                            {
-                                result.push_back("<TOKEN: NUM_REAL, LEXEMA: " + auxS + "  >");
-                            }
-                            auxS.clear();
-                            cont = result.size();
-                            continue;
-                            
-                        }
-                        else if (isWord(ch))
+                    if (isDigit(ch))
+                    {
+
+                        string auxS = "";
+                        bool isD = true;
+                        bool isR = false;
+                        bool erroR = false;
+
+                        while (isD)
                         {
-                            
-                            bool fnd = true;
-                            //cout << *ch << '\n';
-                            aux = *ch;
-                            while (fnd)
+                            //cout << "ENTRE " << *ch << '\n';
+                            auxS += *ch;
+                            if (isDigit(ch))
                             {
-                                //cout << "IS WORDA-"<< *ch <<"-"<< '\n';
-                                
-                                if (isWord(ch))
+                                isD = true;
+                            }
+                            else if (!isDigit(ch) && *ch == '.')
+                            {
+                                isD = false;
+                                isR = true;
+                            }
+                            else if (*ch == ' ' || *ch == lectureF.eof() || isF(ch))
+                            {
+                                auxS = auxS.substr(0, auxS.length() - 1);
+                                isD = false;
+                            }
+                            else
+                            {
+                                ch++;
+                                // cout << "EERROR" << *(ch + 1) << '\n';
+                                while (*ch != ' ' || isF(ch))
                                 {
-                                  //   cout << "IS WORDD-"<< *ch <<"-"<< '\n';
-                                   // cout << "ENTRE AL POSRESERVED" <<'\n';
-                                    if (compare(reserved, 16, aux))
-                                    {
-                                        //cout << *ch << '\n';
-                                        result.push_back("<TOKEN: RESERVED, LEXEMA: " + aux + "  >");
-                                        fnd = false;
-                                    }
+                                    auxS += *ch;
+                                    ch++;
                                 }
-                                else if (*ch == ' ' || *ch == lectureF.eof() || isF(ch))
+                                isD = false;
+                                result.push_back("<ERROR: " + to_string(line) + ">");
+                                erroR = true;
+                            }
+                            ch++;
+                        }
+                        if (!erroR && !isR)
+                        {
+                            result.push_back("<TOKEN: NUM, LEXEMA: " + auxS + "  >");
+                            to_parse.push_back("num");
+                        }
+                        while (isR)
+                        {
+                            auxS += *ch;
+                            if (isDigit(ch))
+                            {
+                                isR = true;
+                            }
+                            else if (*ch == ' ' || *(ch + 1) == lectureF.eof() || isF(ch))
+                            {
+                                auxS = auxS.substr(0, auxS.length() - 1);
+                                isR = false;
+                            }
+                            else
+                            {
+                                result.push_back("<ERROR: " + to_string(line) + ">");
+                                break;
+                            }
+                            ch++;
+                        }
+                        if (!erroR && isR)
+                        {
+                            result.push_back("<TOKEN: NUM_REAL, LEXEMA: " + auxS + "  >");
+                            to_parse.push_back("num");
+                        }
+                        auxS.clear();
+                        cont = result.size();
+                        continue;
+                    }
+                    else if (isWord(ch))
+                    {
+
+                        bool fnd = true;
+                        //cout << *ch << '\n';
+                        aux = *ch;
+                        while (fnd)
+                        {
+                            //cout << "IS WORDA-"<< *ch <<"-"<< '\n';
+                            
+                            
+                            if (isWord(ch))
+                            {
+                                //   cout << "IS WORDD-"<< *ch <<"-"<< '\n';
+                                // cout << "ENTRE AL POSRESERVED" <<'\n';
+                                if (compare(reserved, 19, aux))
                                 {
-                                    //cout << "AQUI "<< '\n';
-                                    result.push_back("<TOKEN: ID, LEXEMA: " + aux + "  >");
+                                    //cout << *ch << '\n';
+                                    pt = true;
+                                    //cout << aux << pt << '\n';
+                                    result.push_back("<TOKEN: RESERVED, LEXEMA: " + aux + "  >");
+                                    to_parse.push_back(aux);
                                     fnd = false;
                                 }
-                                ch++;
-                                aux += *ch;
                             }
-                            continue;
+                            else if (*ch == ' ' || *ch == lectureF.eof() || isF(ch))
+                            {
+                                // cout << "AQUI " << aux  << "-"<< '\n';
+                                std::size_t found = aux.find("main:");
+                                result.push_back("<TOKEN: ID, LEXEMA: " + aux + "  >");
+                                fnd = false;
+                                
+                                if (found != std::string::npos || aux == "return" || aux == "ENDFUNCTION")
+                                {
+                                    //cout << aux << '\n';
+                                    to_parse.push_back("main:");
+                                }
+                                else
+                                {
+                                    to_parse.push_back("id");
+                                }
+                            }
+                            //cout << *ch << '\n';
+                            
+                            ch++;
+                            aux += *ch;
                         }
+                        //cout << *ch << '\n';
+                        continue;
                     }
+                }
 
                 break;
             }
         }
+        if (*ch == ';')
+        {
+            result.push_back("<TOKEN: EOF, LEXEMA: ; >");
+            to_parse.push_back(";");
+        }
+        else
+        {
+            result.push_back("<ERROR: " + to_string(line) + ">");
+        }
+
+        lectureF.close();
+    }
+}
+void to_file(vector<string> to_parser)
+{
+    ofstream file;
+    file.open("D:/8vo semestre/Compiladores/FILES/base/FINAL-PARSER/LL1-parser/ll1.txt");
+    for (auto i : to_parser)
+    {
+        string data = i;
+        std::for_each(data.begin(), data.end(), [](char &c)
+                      { c = ::tolower(c); });
+        /*if(i == "n")
+            file << '\n';*/
+        if (data == ";")
+        {
+            file << data;
+        }
+        else
+            file << data << ",";
     }
 }
 
@@ -371,13 +463,21 @@ int main()
 {
 
     string source = "gramatica2.txt";
+    //cout << "FUNCA "<< '\n';
     anLexico prg1;
     vector<string> rel;
-    prg1.anTokens(source, rel);
+    vector<string> to_parser;
+    prg1.anTokens(source, rel, to_parser);
     cout << "ANALIZADOR COMPLETADO" << '\n';
+    /*
     for (int i = 0; i < rel.size(); i++)
     {
         cout << rel[i] << '\n';
+    }*/
+    to_file(to_parser);
+    for (auto i : to_parser)
+    {
+        cout << i << '\t';
     }
 
     return 0;

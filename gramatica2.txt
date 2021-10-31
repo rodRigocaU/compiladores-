@@ -1,18 +1,16 @@
-asdlkñlkds#
 main:
-	imag = r ead "path.png".
-	imag2 = read "path2.png".
+	imag = read "path.png" .
+	imag2 = read "path2.png" .
 
-	imag3 = read "path3.png".
-	imag4 = read "path4.png".
-	imag5 = read "path5.png".
+	imag3 = read "path3.png" .
+	imag4 = read "path4.png" .
+	imag5 = read "path5.png" .
 	
 	reduceNoise imag3 11
-	colorRi imag4 11 12
-	scale imag5
+	scale imag4 5
+	imag = imag + imag2 + imag3 + imag4 + imag4 .
 
-	save imag6
-	save imag3
-	save imag4
-	save imag5	
+	save "newimg.jpg" imag
+	save "imag3" imag3 
+	save "imag4" imag4 
 ;
