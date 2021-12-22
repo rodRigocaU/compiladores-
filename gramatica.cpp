@@ -4,9 +4,14 @@
 #include <cstring>
 #include <vector>
 #include <algorithm>
+#include <stdlib.h>
+#include <vector>
+
 //#include "lecture.h"
 
 using namespace std;
+
+
 
 bool compare(string arr[], int tam, string pal)
 {
@@ -48,7 +53,7 @@ public:
     char peekChar(const char *s, int ss);
 };
 
-//CPP
+// CPP
 
 bool anLexico::isWord(const char *ch)
 {
@@ -75,14 +80,17 @@ char anLexico::peekChar(const char *s, int ss)
 
 void anLexico::anTokens(string source, vector<string> &result, vector<string> &to_parse)
 {
+    //STACK FOR CODE
+    vector<vector<string>> backEnd;
+
     int cont;
     bool pt = false;
     ifstream lectureF(source);
-    //cout << "FLAG " << '\n';
+    // cout << "FLAG " << '\n';
     bool salto = false;
     std::string str((std::istreambuf_iterator<char>(lectureF)), std::istreambuf_iterator<char>());
     string lastE;
-    //cout << "FLAG " << '\n';
+    // cout << "FLAG " << '\n';
     if (lectureF.is_open())
     {
         const char *ch;
@@ -92,11 +100,11 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
         line = 1;
         while (*ch != lectureF.eof())
         {
-            //cout << *ch << " ";
-            //cout << line << " BOOL " << *ch << pt << '\n';
+            // cout << *ch << " ";
+            // cout << line << " BOOL " << *ch << pt << '\n';
             cont = result.size();
-            //cout << "CH:-" << *ch  << "-"<< '\n';
-            //lectureF >> ch;
+            // cout << "CH:-" << *ch  << "-"<< '\n';
+            // lectureF >> ch;
             if (*ch == '.' && pt == true)
             {
                 pt = false;
@@ -113,7 +121,7 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
             {
                 ch++;
                 line++;
-                //to_parse.push_back("n");
+                // to_parse.push_back("n");
                 continue;
             }
             else
@@ -193,7 +201,7 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                     }
                     break;
                 case '=':
-                    pt = true;  
+                    pt = true;
                     if (peekChar(ch, 1) == '=')
                     {
                         ch += 2;
@@ -223,21 +231,21 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
 
                         if (*ch == '\"')
                         {
-                            //cout << "ENTRE FINAL "<< '\n';
-                            //cout << aux << '\n';
+                            // cout << "ENTRE FINAL "<< '\n';
+                            // cout << aux << '\n';
                             aux += *ch;
                             ch++;
                             result.push_back("<TOKEN: STRING, LEXEMA: " + aux + "  >");
                             to_parse.push_back("string");
                             fnd = false;
                             break;
-                            /*while(*ch == ' ') 
+                            /*while(*ch == ' ')
                             {
                                 ch++;
                             }
                             if(*ch == '.')
-                            { 
-                                
+                            {
+
                                 aux = *ch;
                                 result.push_back("<TOKEN: FIN, LEXEMA: " + aux + "  >");
                                 to_parse.push_back(aux);
@@ -249,7 +257,7 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                         }
                         else if (*ch == lectureF.eof() || isF(ch))
                         {
-                            //cout << "PRINT" << aux << '\n';
+                            // cout << "PRINT" << aux << '\n';
                             result.push_back("<ERROR: " + to_string(line) + ">");
                             fnd = false;
                         }
@@ -258,14 +266,14 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                     break;
 
                 case '%':
-                    //cout << "ENTRE" << '\n';
+                    // cout << "ENTRE" << '\n';
                     fnd = true;
                     aux.clear();
                     aux = *ch;
 
                     while (fnd)
                     {
-                        //cout << *ch << '\n';
+                        // cout << *ch << '\n';
                         ch++;
                         if (*ch == '%')
                         {
@@ -294,7 +302,7 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
 
                 else
                 {
-                    //cout << "ELSEF:" << *ch << "-" << isDigit(ch) << '\n';
+                    // cout << "ELSEF:" << *ch << "-" << isDigit(ch) << '\n';
                     aux.clear();
 
                     if (isDigit(ch))
@@ -307,7 +315,7 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
 
                         while (isD)
                         {
-                            //cout << "ENTRE " << *ch << '\n';
+                            // cout << "ENTRE " << *ch << '\n';
                             auxS += *ch;
                             if (isDigit(ch))
                             {
@@ -375,22 +383,21 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                     {
 
                         bool fnd = true;
-                        //cout << *ch << '\n';
+                        // cout << *ch << '\n';
                         aux = *ch;
                         while (fnd)
                         {
-                            //cout << "IS WORDA-"<< *ch <<"-"<< '\n';
-                            
-                            
+                            // cout << "IS WORDA-"<< *ch <<"-"<< '\n';
+
                             if (isWord(ch))
                             {
                                 //   cout << "IS WORDD-"<< *ch <<"-"<< '\n';
                                 // cout << "ENTRE AL POSRESERVED" <<'\n';
                                 if (compare(reserved, 19, aux))
                                 {
-                                    //cout << *ch << '\n';
+                                    // cout << *ch << '\n';
                                     pt = true;
-                                    //cout << aux << pt << '\n';
+                                    // cout << aux << pt << '\n';
                                     result.push_back("<TOKEN: RESERVED, LEXEMA: " + aux + "  >");
                                     to_parse.push_back(aux);
                                     fnd = false;
@@ -402,10 +409,10 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                                 std::size_t found = aux.find("main:");
                                 result.push_back("<TOKEN: ID, LEXEMA: " + aux + "  >");
                                 fnd = false;
-                                
+
                                 if (found != std::string::npos || aux == "return" || aux == "ENDFUNCTION")
                                 {
-                                    //cout << aux << '\n';
+                                    // cout << aux << '\n';
                                     to_parse.push_back("main:");
                                 }
                                 else
@@ -413,12 +420,12 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
                                     to_parse.push_back("id");
                                 }
                             }
-                            //cout << *ch << '\n';
-                            
+                            // cout << *ch << '\n';
+
                             ch++;
                             aux += *ch;
                         }
-                        //cout << *ch << '\n';
+                        // cout << *ch << '\n';
                         continue;
                     }
                 }
@@ -439,10 +446,19 @@ void anLexico::anTokens(string source, vector<string> &result, vector<string> &t
         lectureF.close();
     }
 }
+
+
 void to_file(vector<string> to_parser)
 {
     ofstream file;
+    ofstream file2;
+    ofstream file3;
+
+    //file.open("D:/8vo semestre/Compiladores/FILES/build/Debug/ll1.txt");
     file.open("D:/8vo semestre/Compiladores/FILES/base/FINAL-PARSER/LL1-parser/ll1.txt");
+    file2.open("D:/8vo semestre/Compiladores/FILES/ll1.txt");
+    file3.open("D:/8vo semestre/Compiladores/FILES/build/Debug/ll1.txt");
+    
     for (auto i : to_parser)
     {
         string data = i;
@@ -453,17 +469,32 @@ void to_file(vector<string> to_parser)
         if (data == ";")
         {
             file << data;
+            file2 << data;
+            file3 << data;
         }
         else
+        {
             file << data << ",";
+            file2 << data << ",";
+            file3 << data << ",";
+        }
     }
+    file.close();
+    file2.close();
+    file3.close();
 }
+
+
+
+
+
+
 
 int main()
 {
 
     string source = "gramatica2.txt";
-    //cout << "FUNCA "<< '\n';
+    // cout << "FUNCA "<< '\n';
     anLexico prg1;
     vector<string> rel;
     vector<string> to_parser;
@@ -475,6 +506,22 @@ int main()
         cout << rel[i] << '\n';
     }*/
     to_file(to_parser);
+
+    string final;
+    for (auto i : to_parser)
+    {
+        final += i;
+    }
+
+    cout << "final2" << '\n';
+    
+    string command = "pytest base/FINAL-PARSER/LL1-parser/tests/test_parsing.py ";
+    // string command = "pytest D:/8vo semestre/Compiladores/FILES/base/LL1-parser/mainPar.py" + final;
+    //string command = "pytest ../../base/FINAL-PARSER/LL1-parser/tests/test_parsing.py ";
+    
+    system(command.c_str());
+    cout << "Datos enviados a python " << '\n';
+
     for (auto i : to_parser)
     {
         cout << i << '\t';
